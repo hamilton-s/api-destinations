@@ -1,0 +1,36 @@
+service: api-destinations
+
+frameworkVersion: "3"
+
+provider:
+  name: aws
+  runtime: nodejs14.x
+  region: eu-west-2
+
+  iamRoleStatements:
+    - Effect: Allow
+      Action: "*"
+      Resource: "*"
+
+  apiGateway:
+    shouldStartNameWithService: true
+    apiKeys:
+      - name: api-destinations-apikey
+        value: ${env:API_KEY, ''}
+
+functions:
+  triager:
+    handler: energy.default
+    events:
+      - http:
+          method: POST
+          path: /energy
+          request:
+            parameters:
+              headers:
+                authorization: true
+                x-api-key: true
+resources:
+  Outputs:
+    apiKeyId:
+      Value: !Ref ApiGatewayApiKey1
