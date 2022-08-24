@@ -1,4 +1,4 @@
-service: api-destinations
+service: rest-endpoint
 
 frameworkVersion: "3"
 
@@ -15,7 +15,7 @@ provider:
   apiGateway:
     shouldStartNameWithService: true
     apiKeys:
-      - name: api-destinations-apikey
+      - name: rest-endpoint-apikey
         value: ${env:API_KEY, ''}
 
 functions:
@@ -25,11 +25,7 @@ functions:
       - http:
           method: POST
           path: /energy
-          request:
-            parameters:
-              headers:
-                authorization: true
-                x-api-key: true
+
 resources:
   Outputs:
     apiKeyId:
