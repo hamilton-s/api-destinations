@@ -19,12 +19,13 @@ provider:
         value: ${env:API_KEY, ''}
 
 functions:
-  triager:
-    handler: energy.default
+  endpoint:
+    handler: endpoint.default
+    maximumRetryAttempts: 0
     events:
       - http:
           method: POST
-          path: /energy
+          path: /endpoint
 
 resources:
   Outputs:
