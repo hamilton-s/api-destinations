@@ -38,7 +38,7 @@ resources:
         ConnectionArn: !GetAtt MyConnection.Arn
         Description: HTTP Connections
         HttpMethod: POST
-        InvocationEndpoint: https://kz5xjhdea1.execute-api.eu-west-2.amazonaws.com/dev/endpoint
+        InvocationEndpoint: https://<xxx>.execute-api.eu-west-2.amazonaws.com/dev/endpoint
     EBRule:
       Type: AWS::Events::Rule
       Properties:
