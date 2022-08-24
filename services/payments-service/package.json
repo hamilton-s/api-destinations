@@ -1,0 +1,7 @@
+{
+  "description": "payments service",
+  "type": "module",
+  "devDependencies": {
+    "serverless": "^3.22.0"
+  }
+}

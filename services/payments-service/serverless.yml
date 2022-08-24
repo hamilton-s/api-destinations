@@ -1,0 +1,72 @@
+service: payments-service
+
+frameworkVersion: "3"
+
+provider:
+  name: aws
+  runtime: nodejs14.x
+  region: eu-west-2
+  eventBridge:
+    useCloudFormation: true
+
+  iamRoleStatements:
+    - Effect: Allow
+      Action: "*"
+      Resource: "*"
+
+  environment:
+    HTTP_API_KEY: ${ssm:/HTTP_API_KEY}
+
+resources:
+  Resources:
+    PaymentsInternalEventBus:
+      Type: AWS::Events::EventBus
+      Properties:
+        Name: custom-event-bus
+    MyConnection:
+      Type: AWS::Events::Connection
+      Properties:
+        AuthorizationType: API_KEY
+        Description: Connection to HTTP Endpoint
+        AuthParameters:
+          ApiKeyAuthParameters:
+            ApiKeyName: rest-endpoint-apikey
+            ApiKeyValue: ${self:provider.environment.HTTP_API_KEY}
+    HTTPEndpoint:
+      Type: AWS::Events::ApiDestination
+      Properties:
+        ConnectionArn: !GetAtt MyConnection.Arn
+        Description: HTTP Connections
+        HttpMethod: POST
+        InvocationEndpoint: https://kz5xjhdea1.execute-api.eu-west-2.amazonaws.com/dev/endpoint
+    EBRule:
+      Type: AWS::Events::Rule
+      Properties:
+        EventBusName: custom-event-bus
+        EventPattern:
+          { "detail": { "metadata": { "domain": ["LEGO-PAYMENTS"] } } }
+        Targets:
+          - Arn:
+              Fn::GetAtt: HTTPEndpoint.Arn
+            Id: "destination-rule"
+            RoleArn: !GetAtt EventBridgeTargetRole.Arn
+    EventBridgeTargetRole:
+      Type: AWS::IAM::Role
+      Properties:
+        AssumeRolePolicyDocument:
+          Version: "2012-10-17"
+          Statement:
+            - Effect: Allow
+              Principal:
+                Service:
+                  - events.amazonaws.com
+              Action:
+                - sts:AssumeRole
+        Policies:
+          - PolicyName: AllowAPIdestinationAccess
+            PolicyDocument:
+              Version: "2012-10-17"
+              Statement:
+                - Effect: Allow
+                  Action: "events:InvokeApiDestination"
+                  Resource: !GetAtt HTTPEndpoint.Arn
